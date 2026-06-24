@@ -37,7 +37,7 @@ The human is **in the loop** on every step — nothing changes without them.
 4. The agent opens a PR with the root cause, the change, and green tests.
 5. A human reviews and approves (or requests changes). Merge ships the fix.
 
-The human is **reviews the loop** — they supervise and approve, but the agent did the investigation and the work.
+The human is **on the loop** — they supervise and approve, but the agent did the investigation and the work.
 
 ### Resources 
 
