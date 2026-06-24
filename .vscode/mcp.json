@@ -1,0 +1,33 @@
+// VS Code with GitHub Copilot SmartMCP Configuration file 
+// SmartBear MCP Documentation: https://smartbear.portal.swaggerhub.com/smartbear-mcp/docs/getting-started
+// SmartBear MCP GitHub Repository: https://github.com/SmartBear/smartbear-mcp
+{
+  "servers": {
+    "smartbear": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@smartbear/mcp@latest"
+      ],
+      "env": {
+        "BUGSNAG_AUTH_TOKEN": "${input:bugsnag_auth_token}",
+        "BUGSNAG_PROJECT_API_KEY": "${input:bugsnag_project_api_key}",
+      }
+    }
+  },
+  "inputs": [
+    {
+      "id": "bugsnag_auth_token",
+      "type": "promptString",
+      "description": "BugSnag Auth Token",
+      "password": true
+    },
+    {
+      "id": "bugsnag_project_api_key",
+      "type": "promptString",
+      "description": "BugSnag Project API Key - for single project interactions",
+      "password": false
+    }
+  ]
+}

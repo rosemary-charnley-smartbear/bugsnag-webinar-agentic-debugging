@@ -1,0 +1,78 @@
+# L4 (Autonomous): BugSnag -> agent -> PR, human approves.
+#
+# This is the "Scopely-style" pattern: when a high-impact error fires in
+# BugSnag, a webhook (via repository_dispatch) wakes an agent. The agent uses
+# the SmartBear MCP server to pull the error + stack trace, reads the repo,
+# writes a fix on a branch, runs the tests, and opens a PR for a human to
+# approve. No human touches a keyboard until the review step.
+#
+# NOTE: This is an illustrative scaffold for the webinar. The "run agent" step
+# is where you drop in your agent runner (e.g. Claude Code / Copilot coding
+# agent) wired to the SmartBear MCP server. Secrets are referenced, not stored.
+
+name: Agentic BugSnag Fix (L4)
+
+on:
+  # BugSnag data-forwarding / webhook posts here when an error crosses a threshold.
+  repository_dispatch:
+    types: [bugsnag_error]
+  # Allow manual kick-off in the demo with an error ID.
+  workflow_dispatch:
+    inputs:
+      error_id:
+        description: "BugSnag error ID to investigate"
+        required: true
+
+permissions:
+  contents: write        # create the fix branch
+  pull-requests: write   # open the PR
+
+jobs:
+  triage-and-fix:
+    runs-on: ubuntu-latest
+    env:
+      ERROR_ID: ${{ github.event.inputs.error_id || github.event.client_payload.error_id }}
+      BUGSNAG_AUTH_TOKEN: ${{ secrets.BUGSNAG_AUTH_TOKEN }}
+      BUGSNAG_PROJECT_API_KEY: ${{ secrets.BUGSNAG_PROJECT_API_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Install deps
+        run: npm ci || npm install
+
+      # The agent connects to the SmartBear MCP server, pulls the error context
+      # (stack trace, affected users, metadata), locates the offending code,
+      # applies a fix, and runs the tests. Replace the echo with your runner.
+      - name: Run agent (SmartBear MCP -> fix)
+        run: |
+          echo "Agent investigating BugSnag error: $ERROR_ID"
+          echo "1. MCP get_error_details / get_error -> stack trace + metadata"
+          echo "2. Locate src/services/pricing.js, apply guarded coupon handling"
+          echo "3. npm test -> regression test passes"
+          # e.g.: npx @your-org/agent-runner --task "Fix BugSnag $ERROR_ID" \
+          #        --mcp @smartbear/mcp
+        # In a real run the agent edits files here.
+
+      - name: Verify tests pass
+        run: npm test
+
+      - name: Open pull request for human approval
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: agent/fix-bugsnag-${{ env.ERROR_ID }}
+          title: "Fix BugSnag ${{ env.ERROR_ID }}: handle orders without a coupon"
+          body: |
+            Automated fix proposed by the agentic pipeline.
+
+            **Source:** BugSnag error `${{ env.ERROR_ID }}`
+            **Root cause:** `calculateOrderTotal` assumed every order has a coupon.
+            **Change:** nullish handling for `order.coupon.percentOff` + regression test.
+
+            Tests pass on this branch. Review and approve to merge.
+          labels: agentic-fix, bugsnag

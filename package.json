@@ -1,0 +1,20 @@
+{
+  "name": "bugsnag-mcp-demo",
+  "version": "1.0.0",
+  "description": "Demo app for the BugSnag + SmartBear MCP agentic debugging webinar (Levels of Autonomy L3 & L4)",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node --env-file=.env src/server.js",
+    "dev": "node --watch --env-file=.env src/server.js",
+    "test": "node --test",
+    "trigger-error": "node scripts/trigger-error.js"
+  },
+  "keywords": ["bugsnag", "smartbear", "mcp", "agentic", "debugging", "observability"],
+  "author": "SmartBear",
+  "license": "MIT",
+  "dependencies": {
+    "@bugsnag/js": "^8.2.0",
+    "express": "^4.19.2"
+  }
+}
