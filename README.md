@@ -1,5 +1,7 @@
 # Bugsnag Webinar Agentic Debugging
 
+Date: 6/24/2026
+
 This is the code repository for the SmartBear BugSnag Webinar on Agentic Debugging. 
 
 ### Getting Started
